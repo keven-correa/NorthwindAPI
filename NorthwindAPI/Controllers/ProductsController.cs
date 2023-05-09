@@ -28,7 +28,7 @@ namespace NorthwindAPI.Controllers
             }
             var product = new Product()
             {
-                ProductName = productDto.ProductName,
+                ProductName = productDto.ProductName!,
                 CategoryId = productDto.CategoryId,
                 SupplierId = productDto.SupplierId,
                 QuantityPerUnit = productDto.QuantityPerUnit,
@@ -81,7 +81,7 @@ namespace NorthwindAPI.Controllers
         }
 
         [HttpGet("search-by-name")]
-        public async Task<ActionResult<ProductResponseDto>> searchByName(string name)
+        public async Task<ActionResult<ProductResponseDto>> SearchByName(string name)
         {
             var product = await _context.Products.Where(p => p.ProductName.Contains(name)).Select(p => new ProductResponseDto
             {
@@ -184,7 +184,7 @@ namespace NorthwindAPI.Controllers
                 QuantityPerUnit = p.QuantityPerUnit,
                 Discontinued = p.Discontinued,
                 UnitPrice = p.UnitPrice,
-                UnitsInStock = p.UnitsInStock,
+                UnitsInStock = p.UnitsInStock,//
             }).FirstOrDefaultAsync(x => x.ProductId == id);
 
             return Ok(product);
