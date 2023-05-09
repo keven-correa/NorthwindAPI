@@ -19,7 +19,7 @@ namespace NorthwindAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct([FromBody] CreateProductDto productDto)
+        public async Task<ActionResult<Product>> PostProduct([FromBody] ProductRequestDto productDto)
         {
             if (_context.Products == null)
             {
@@ -61,6 +61,7 @@ namespace NorthwindAPI.Controllers
                 UnitsInStock = x.UnitsInStock,
                 CategoryId = x.CategoryId,
                 Discontinued = x.Discontinued,
+                SupplierId = x.SupplierId,
             })
                 .Skip((paginationParams.CurrentPage - 1) * paginationParams.PageSize)
                 .Take(paginationParams.PageSize)
@@ -108,15 +109,15 @@ namespace NorthwindAPI.Controllers
 
             var products = await _context.Products
                 .Select(x => new ProductResponseDto
-            {
-                ProductId = x.ProductId,
-                ProductName = x.ProductName,
-                QuantityPerUnit = x.QuantityPerUnit,
-                UnitPrice = x.UnitPrice,
-                UnitsInStock = x.UnitsInStock,
-                CategoryId = x.CategoryId,
-                Discontinued = x.Discontinued,
-            })
+                {
+                    ProductId = x.ProductId,
+                    ProductName = x.ProductName,
+                    QuantityPerUnit = x.QuantityPerUnit,
+                    UnitPrice = x.UnitPrice,
+                    UnitsInStock = x.UnitsInStock,
+                    CategoryId = x.CategoryId,
+                    Discontinued = x.Discontinued,
+                })
                 .Where(p => p.Discontinued == true)
                 .Skip((paginationParams.CurrentPage - 1) * paginationParams.PageSize)
                 .Take(paginationParams.PageSize)
@@ -151,8 +152,6 @@ namespace NorthwindAPI.Controllers
             return await _context.ProductsByCategories
                 .OrderBy(p => p.CategoryName)
                 .ToArrayAsync();
-
-
         }
 
         [HttpGet("highest-quantity")]
@@ -181,15 +180,16 @@ namespace NorthwindAPI.Controllers
             {
                 return NotFound();
             }
-            var product = await _context.Products.Select(p => new ProductResponseDto
+            var product = await _context.Products.Select(x => new ProductResponseDto
             {
-                ProductId = p.ProductId,
-                CategoryId = p.CategoryId,
-                ProductName = p.ProductName,
-                QuantityPerUnit = p.QuantityPerUnit,
-                Discontinued = p.Discontinued,
-                UnitPrice = p.UnitPrice,
-                UnitsInStock = p.UnitsInStock,
+                ProductId = x.ProductId,
+                ProductName = x.ProductName,
+                QuantityPerUnit = x.QuantityPerUnit,
+                UnitPrice = x.UnitPrice,
+                UnitsInStock = x.UnitsInStock,
+                CategoryId = x.CategoryId,
+                Discontinued = x.Discontinued,
+                SupplierId = x.SupplierId,
             }).FirstOrDefaultAsync(x => x.ProductId == id);
 
             return Ok(product);
@@ -197,55 +197,68 @@ namespace NorthwindAPI.Controllers
 
         // PUT: api/Products/5
         //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutProduct(int id, Product product)
-        //{
-        //    if (id != product.ProductId)
-        //    {
-        //        return BadRequest();
-        //    }
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PutProduct(int id, ProductRequestDto productDto)
+        {
+            if (!ProductExists(id))
+            {
+                return NotFound();
+            }
+            var product = new Product()
+            {
+                ProductId = id,
+                ProductName = productDto.ProductName!,
+                CategoryId = productDto.CategoryId,
+                SupplierId = productDto.SupplierId,
+                QuantityPerUnit = productDto.QuantityPerUnit,
+                UnitPrice = productDto.UnitPrice,
+                UnitsInStock = productDto.UnitsInStock,
+                Discontinued = productDto.Discontinued,
+                UnitsOnOrder = productDto.UnitsOnOrder,
+                ReorderLevel = productDto.ReorderLevel,
 
-        //    _context.Entry(product).State = EntityState.Modified;
+            };
+            _context.Entry(product).State = EntityState.Modified;
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!ProductExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProductExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
 
 
         //// DELETE: api/Products/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteProduct(int id)
-        //{
-        //    if (_context.Products == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var product = await _context.Products.FindAsync(id);
-        //    if (product == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            if (_context.Products == null)
+            {
+                return NotFound();
+            }
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
 
-        //    _context.Products.Remove(product);
-        //    await _context.SaveChangesAsync();
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
 
         private bool ProductExists(int id)
         {
