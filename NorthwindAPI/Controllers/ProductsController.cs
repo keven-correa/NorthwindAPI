@@ -4,7 +4,6 @@ using NorthwindAPI.Dtos.Common;
 using NorthwindAPI.Dtos.Management;
 using NorthwindAPI.Dtos.Responses;
 using NorthwindAPI.Entities;
-using NuGet.Versioning;
 
 namespace NorthwindAPI.Controllers
 {
@@ -36,7 +35,7 @@ namespace NorthwindAPI.Controllers
                 UnitsInStock = productDto.UnitsInStock,
                 Discontinued = productDto.Discontinued,
                 UnitsOnOrder = productDto.UnitsOnOrder,
-                ReorderLevel= productDto.ReorderLevel,
+                ReorderLevel = productDto.ReorderLevel,
             };
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
@@ -83,16 +82,18 @@ namespace NorthwindAPI.Controllers
         [HttpGet("search-by-name")]
         public async Task<ActionResult<ProductResponseDto>> SearchByName(string name)
         {
-            var product = await _context.Products.Where(p => p.ProductName.Contains(name)).Select(p => new ProductResponseDto
-            {
-                ProductId = p.ProductId,
-                ProductName = p.ProductName,
-                CategoryId = p.CategoryId,
-                Discontinued = p.Discontinued,
-                QuantityPerUnit = p.QuantityPerUnit,
-                UnitPrice = p.UnitPrice,
-                UnitsInStock = p.UnitsInStock,
-            }).ToListAsync();
+            var product = await _context.Products
+                .Where(p => p.ProductName.Contains(name))
+                .Select(p => new ProductResponseDto
+                {
+                    ProductId = p.ProductId,
+                    ProductName = p.ProductName,
+                    CategoryId = p.CategoryId,
+                    Discontinued = p.Discontinued,
+                    QuantityPerUnit = p.QuantityPerUnit,
+                    UnitPrice = p.UnitPrice,
+                    UnitsInStock = p.UnitsInStock,
+                }).ToListAsync();
 
             return Ok(product);
         }
@@ -105,7 +106,8 @@ namespace NorthwindAPI.Controllers
 
             var totalPages = (int)Math.Ceiling((double)productsCount / paginationParams.PageSize);
 
-            var products = await _context.Products.Select(x => new ProductResponseDto
+            var products = await _context.Products
+                .Select(x => new ProductResponseDto
             {
                 ProductId = x.ProductId,
                 ProductName = x.ProductName,
@@ -146,7 +148,9 @@ namespace NorthwindAPI.Controllers
             {
                 return NotFound();
             }
-            return await _context.ProductsByCategories.OrderBy(p => p.CategoryName).ToArrayAsync();
+            return await _context.ProductsByCategories
+                .OrderBy(p => p.CategoryName)
+                .ToArrayAsync();
 
 
         }
@@ -164,7 +168,8 @@ namespace NorthwindAPI.Controllers
                 UnitPrice = p.UnitPrice,
                 UnitsInStock = p.UnitsInStock,
             })
-                .OrderByDescending(p => p.UnitsInStock).FirstOrDefaultAsync();
+                .OrderByDescending(p => p.UnitsInStock)
+                .FirstOrDefaultAsync();
 
             return Ok(product);
         }
@@ -184,7 +189,7 @@ namespace NorthwindAPI.Controllers
                 QuantityPerUnit = p.QuantityPerUnit,
                 Discontinued = p.Discontinued,
                 UnitPrice = p.UnitPrice,
-                UnitsInStock = p.UnitsInStock,//
+                UnitsInStock = p.UnitsInStock,
             }).FirstOrDefaultAsync(x => x.ProductId == id);
 
             return Ok(product);
