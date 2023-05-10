@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NorthwindAPI.Dtos.Common;
+using NorthwindAPI.Dtos.Extensions;
 using NorthwindAPI.Dtos.Management;
 using NorthwindAPI.Dtos.Responses;
 using NorthwindAPI.Entities;
@@ -25,22 +26,11 @@ namespace NorthwindAPI.Controllers
             {
                 return Problem("Entity set 'NorthwindContext.Products'  is null.");
             }
-            var product = new Product()
-            {
-                ProductName = productDto.ProductName!,
-                CategoryId = productDto.CategoryId,
-                SupplierId = productDto.SupplierId,
-                QuantityPerUnit = productDto.QuantityPerUnit,
-                UnitPrice = productDto.UnitPrice,
-                UnitsInStock = productDto.UnitsInStock,
-                Discontinued = productDto.Discontinued,
-                UnitsOnOrder = productDto.UnitsOnOrder,
-                ReorderLevel = productDto.ReorderLevel,
-            };
-            _context.Products.Add(product);
+            var productEntity = productDto.ToEntity();
+            _context.Products.Add(productEntity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProduct", new { id = product.ProductId }, product);
+            return CreatedAtAction("GetProduct", new { id = productEntity.ProductId }, productEntity);
         }
 
         [HttpGet]
@@ -195,30 +185,35 @@ namespace NorthwindAPI.Controllers
             return Ok(product);
         }
 
-        // PUT: api/Products/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PutProduct(int id, ProductRequestDto productDto)
+        public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
         {
             if (!ProductExists(id))
             {
                 return NotFound();
             }
-            var product = new Product()
-            {
-                ProductId = id,
-                ProductName = productDto.ProductName!,
-                CategoryId = productDto.CategoryId,
-                SupplierId = productDto.SupplierId,
-                QuantityPerUnit = productDto.QuantityPerUnit,
-                UnitPrice = productDto.UnitPrice,
-                UnitsInStock = productDto.UnitsInStock,
-                Discontinued = productDto.Discontinued,
-                UnitsOnOrder = productDto.UnitsOnOrder,
-                ReorderLevel = productDto.ReorderLevel,
+            //var product = new Product()
+            //{
+            //    ProductId = id,
+            //    ProductName = productDto.ProductName!,
+            //    CategoryId = productDto.CategoryId,
+            //    SupplierId = productDto.SupplierId,
+            //    QuantityPerUnit = productDto.QuantityPerUnit,
+            //    UnitPrice = productDto.UnitPrice,
+            //    UnitsInStock = productDto.UnitsInStock,
+            //    Discontinued = productDto.Discontinued,
+            //    UnitsOnOrder = productDto.UnitsOnOrder,
+            //    ReorderLevel = productDto.ReorderLevel,
 
-            };
-            _context.Entry(product).State = EntityState.Modified;
+            //};
+            var finded = await _context.Products.FindAsync(id);
+            Product? productEntity = productDto.ToUpdateEntity();
+            //productEntity.ProductId = finded!.ProductId;
+            //productEntity.CategoryId = finded.CategoryId;
+            //productEntity.SupplierId = finded.SupplierId;
+            //_context.Entry(productEntity).State = EntityState.Modified;
+            _context.Products.Update(productEntity);
 
             try
             {
@@ -240,7 +235,7 @@ namespace NorthwindAPI.Controllers
         }
 
 
-        //// DELETE: api/Products/5
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
