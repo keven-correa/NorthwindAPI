@@ -187,52 +187,51 @@ namespace NorthwindAPI.Controllers
 
         
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
-        {
-            if (!ProductExists(id))
-            {
-                return NotFound();
-            }
-            //var product = new Product()
-            //{
-            //    ProductId = id,
-            //    ProductName = productDto.ProductName!,
-            //    CategoryId = productDto.CategoryId,
-            //    SupplierId = productDto.SupplierId,
-            //    QuantityPerUnit = productDto.QuantityPerUnit,
-            //    UnitPrice = productDto.UnitPrice,
-            //    UnitsInStock = productDto.UnitsInStock,
-            //    Discontinued = productDto.Discontinued,
-            //    UnitsOnOrder = productDto.UnitsOnOrder,
-            //    ReorderLevel = productDto.ReorderLevel,
+        //public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
+        //{
+        //    if (!ProductExists(id))
+        //    {
+        //        return NotFound();
+        //    }
+        //    var product = new Product()
+        //    {
+        //        ProductId = id,
+        //        ProductName = productDto.ProductName!,
+        //        CategoryId = productDto.CategoryId,
+        //        SupplierId = productDto.SupplierId,
+        //        QuantityPerUnit = productDto.QuantityPerUnit,
+        //        UnitPrice = productDto.UnitPrice,
+        //        UnitsInStock = productDto.UnitsInStock,
+        //        Discontinued = productDto.Discontinued,
+        //        UnitsOnOrder = productDto.UnitsOnOrder,
+        //        ReorderLevel = productDto.ReorderLevel,
 
-            //};
-            var finded = await _context.Products.FindAsync(id);
-            Product? productEntity = productDto.ToUpdateEntity();
-            //productEntity.ProductId = finded!.ProductId;
-            //productEntity.CategoryId = finded.CategoryId;
-            //productEntity.SupplierId = finded.SupplierId;
-            //_context.Entry(productEntity).State = EntityState.Modified;
-            _context.Products.Update(productEntity);
+        //    };
+        //    var productEntity = await _context.Products.FindAsync(id);
+        //    var productEntity = productDto.ToUpdateEntity();
+        //    productEntity.ProductId = id;
+        //    productEntity.CategoryId = productDto.CategoryId;
+        //    productEntity.SupplierId = productDto.SupplierId;
+        //    _context.Entry(product).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!ProductExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
 
         

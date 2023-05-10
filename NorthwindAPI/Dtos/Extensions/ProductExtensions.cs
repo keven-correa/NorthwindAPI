@@ -38,19 +38,8 @@ namespace NorthwindAPI.Dtos.Extensions
             };
         }
 
-        //public static void UpdateFromDto(this Product product, ProductRequestDto productRequestDto, int id)
-        //{
-        //    product.ProductId = id;
-        //    product.ProductName = productRequestDto.ProductName!;
-        //    product.CategoryId = productRequestDto.CategoryId!;
-        //    product.SupplierId = productRequestDto.SupplierId!;
-        //    product.QuantityPerUnit = productRequestDto.QuantityPerUnit!;
-        //    product.UnitPrice = productRequestDto.UnitPrice!;
-        //    product.UnitsInStock = productRequestDto.UnitsInStock!;
-        //    product.UnitsOnOrder = productRequestDto.UnitsOnOrder;
-        //    product.ReorderLevel = productRequestDto.ReorderLevel;
-
-        //}
+       
+    
         public static Product ToUpdateEntity(this ProductRequestUpdateDto productDto)
         {
             return new Product
