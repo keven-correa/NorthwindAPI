@@ -32,19 +32,5 @@ public partial class Product
 
     public  Supplier? Supplier { get; set; }
 
-    public static implicit operator Product(ProductRequestUpdateDto v)
-    {
-        return new ProductRequestUpdateDto
-        {
-            ProductName = v.ProductName,
-            SupplierId = v.SupplierId,
-            CategoryId = v.CategoryId,
-            QuantityPerUnit = v.QuantityPerUnit,
-            UnitPrice = v.UnitPrice,
-            UnitsInStock = v.UnitsInStock,
-            UnitsOnOrder = v.UnitsOnOrder,
-            Discontinued = v.Discontinued,
-            ReorderLevel = v.ReorderLevel,
-        };
-    }
+   
 }

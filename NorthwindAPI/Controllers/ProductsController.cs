@@ -184,7 +184,6 @@ namespace NorthwindAPI.Controllers
 
             return Ok(product);
         }
-
         
         [HttpPatch("{id}")]
         public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
@@ -196,21 +195,18 @@ namespace NorthwindAPI.Controllers
             var productToUpdate = await _context.Products.FindAsync(id);
             if (productToUpdate == null) return BadRequest();
 
-            productToUpdate = productDto;
-            //productToUpdate.ProductName = productDto.ProductName!;
-            //productToUpdate.QuantityPerUnit = productDto.QuantityPerUnit;
-            //productToUpdate.UnitPrice = productDto.UnitPrice;
-            //productToUpdate.UnitsInStock = productDto.UnitsInStock;
-            //productToUpdate.CategoryId = productDto.CategoryId;
-            //productToUpdate.Discontinued = productDto.Discontinued;
+            productToUpdate.ProductName = productDto.ProductName!;
+            productToUpdate.QuantityPerUnit = productDto.QuantityPerUnit;
+            productToUpdate.UnitPrice = productDto.UnitPrice;
+            productToUpdate.UnitsInStock = productDto.UnitsInStock;
+            productToUpdate.CategoryId = productDto.CategoryId;
+            productToUpdate.Discontinued = productDto.Discontinued;
 
             _context.Update(productToUpdate);
             await _context.SaveChangesAsync();
           
             return NoContent();
         }
-
-
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
