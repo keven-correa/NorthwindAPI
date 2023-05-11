@@ -37,24 +37,5 @@ namespace NorthwindAPI.Dtos.Extensions
                 ReorderLevel = productDto.ReorderLevel,
             };
         }
-
-       
-    
-        public static Product ToUpdateEntity(this ProductRequestUpdateDto productDto)
-        {
-            return new Product
-            {
-                ProductId= productDto.ProductId,
-                ProductName = productDto.ProductName!,
-                CategoryId = productDto.CategoryId,
-                SupplierId = productDto.SupplierId,
-                QuantityPerUnit = productDto.QuantityPerUnit,
-                UnitPrice = productDto.UnitPrice,
-                UnitsInStock = productDto.UnitsInStock,
-                Discontinued = productDto.Discontinued,
-                UnitsOnOrder = productDto.UnitsOnOrder,
-                ReorderLevel = productDto.ReorderLevel,
-            };
-        }
     }
 }

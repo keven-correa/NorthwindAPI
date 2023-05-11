@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NorthwindAPI.Dtos.Management;
+using System;
 using System.Collections.Generic;
 
 namespace NorthwindAPI.Entities;
@@ -30,4 +31,20 @@ public partial class Product
     public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
 
     public  Supplier? Supplier { get; set; }
+
+    public static implicit operator Product(ProductRequestUpdateDto v)
+    {
+        return new ProductRequestUpdateDto
+        {
+            ProductName = v.ProductName,
+            SupplierId = v.SupplierId,
+            CategoryId = v.CategoryId,
+            QuantityPerUnit = v.QuantityPerUnit,
+            UnitPrice = v.UnitPrice,
+            UnitsInStock = v.UnitsInStock,
+            UnitsOnOrder = v.UnitsOnOrder,
+            Discontinued = v.Discontinued,
+            ReorderLevel = v.ReorderLevel,
+        };
+    }
 }

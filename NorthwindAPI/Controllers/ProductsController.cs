@@ -30,7 +30,7 @@ namespace NorthwindAPI.Controllers
             _context.Products.Add(productEntity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProduct", new { id = productEntity.ProductId }, productEntity);
+            return CreatedAtAction(nameof(GetProduct), new { id = productEntity.ProductId }, productEntity);
         }
 
         [HttpGet]
@@ -187,54 +187,31 @@ namespace NorthwindAPI.Controllers
 
         
         [HttpPatch("{id}")]
-        //public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
-        //{
-        //    if (!ProductExists(id))
-        //    {
-        //        return NotFound();
-        //    }
-        //    var product = new Product()
-        //    {
-        //        ProductId = id,
-        //        ProductName = productDto.ProductName!,
-        //        CategoryId = productDto.CategoryId,
-        //        SupplierId = productDto.SupplierId,
-        //        QuantityPerUnit = productDto.QuantityPerUnit,
-        //        UnitPrice = productDto.UnitPrice,
-        //        UnitsInStock = productDto.UnitsInStock,
-        //        Discontinued = productDto.Discontinued,
-        //        UnitsOnOrder = productDto.UnitsOnOrder,
-        //        ReorderLevel = productDto.ReorderLevel,
+        public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
+        {
+            if (!ProductExists(id))
+            {
+                return NotFound();
+            }
+            var productToUpdate = await _context.Products.FindAsync(id);
+            if (productToUpdate == null) return BadRequest();
 
-        //    };
-        //    var productEntity = await _context.Products.FindAsync(id);
-        //    var productEntity = productDto.ToUpdateEntity();
-        //    productEntity.ProductId = id;
-        //    productEntity.CategoryId = productDto.CategoryId;
-        //    productEntity.SupplierId = productDto.SupplierId;
-        //    _context.Entry(product).State = EntityState.Modified;
+            productToUpdate = productDto;
+            //productToUpdate.ProductName = productDto.ProductName!;
+            //productToUpdate.QuantityPerUnit = productDto.QuantityPerUnit;
+            //productToUpdate.UnitPrice = productDto.UnitPrice;
+            //productToUpdate.UnitsInStock = productDto.UnitsInStock;
+            //productToUpdate.CategoryId = productDto.CategoryId;
+            //productToUpdate.Discontinued = productDto.Discontinued;
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!ProductExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
+            _context.Update(productToUpdate);
+            await _context.SaveChangesAsync();
+          
+            return NoContent();
+        }
 
 
-        
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
