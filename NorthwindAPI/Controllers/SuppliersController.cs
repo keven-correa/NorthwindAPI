@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using NorthwindAPI.Dtos.Common;
 using NorthwindAPI.Dtos.Responses;
 using NorthwindAPI.Entities;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace NorthwindAPI.Controllers
 {
@@ -57,11 +59,9 @@ namespace NorthwindAPI.Controllers
             return Ok(response);
         }
         [HttpGet("supplier-with-products/{id}")]
-        public async Task<ActionResult<SuppliersWithProductsDto>> SuppliersWithPorudcts(int id)
+        public async Task<ActionResult<Supplier>> SuppliersWithPorudcts(int id)
         {
-            var supplier = await _context.Suppliers.Include(s => (s as Product).Products.Select(p => new ProductResponseDto {ProductId = p.ProductId, ProductName = p.ProductName, CategoryId = p.CategoryId, 
-            Discontinued = p.Discontinued, UnitPrice = p.UnitPrice, QuantityPerUnit = p.QuantityPerUnit, SupplierId = p.SupplierId, UnitsInStock = p.UnitsInStock}))
-                .FirstOrDefaultAsync(s => s.SupplierId == id);
+            var supplier = await _context.Suppliers.Include(p => p.Products).FirstOrDefaultAsync(x => x.SupplierId == id);
 
             if (supplier == null) return NotFound();
 
@@ -92,7 +92,13 @@ namespace NorthwindAPI.Controllers
             //    })
 
             //});
-            return Ok(supplier);   
+            //return Ok(supplier);   
+
+            return new JsonResult(supplier, new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
     }
 }
