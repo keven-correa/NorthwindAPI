@@ -1,6 +1,4 @@
-﻿using NorthwindAPI.Entities;
-
-namespace NorthwindAPI.Dtos.Common
+﻿namespace NorthwindAPI.Dtos.Common
 {
     public class PaginationParamsDto
     {

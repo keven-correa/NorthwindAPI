@@ -9,7 +9,7 @@ namespace NorthwindAPI.Dtos.Extensions
         {
             return new ProductRequestDto
             {
-                
+
                 ProductName = product.ProductName,
                 CategoryId = product.CategoryId,
                 SupplierId = product.SupplierId,

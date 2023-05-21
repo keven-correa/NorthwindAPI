@@ -1,6 +1,4 @@
-﻿using NorthwindAPI.Entities;
-
-namespace NorthwindAPI.Dtos.Management
+﻿namespace NorthwindAPI.Dtos.Management
 {
     public class ProductRequestDto
     {

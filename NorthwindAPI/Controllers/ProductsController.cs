@@ -184,7 +184,7 @@ namespace NorthwindAPI.Controllers
 
             return Ok(product);
         }
-        
+
         [HttpPatch("{id}")]
         public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
         {
@@ -204,7 +204,7 @@ namespace NorthwindAPI.Controllers
 
             _context.Update(productToUpdate);
             await _context.SaveChangesAsync();
-          
+
             return NoContent();
         }
 

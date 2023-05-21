@@ -1,8 +1,4 @@
-﻿using NorthwindAPI.Dtos.Management;
-using System;
-using System.Collections.Generic;
-
-namespace NorthwindAPI.Entities;
+﻿namespace NorthwindAPI.Entities;
 
 public partial class Product
 {
@@ -30,7 +26,7 @@ public partial class Product
 
     public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();
 
-    public  Supplier? Supplier { get; set; }
+    public Supplier? Supplier { get; set; }
 
-   
+
 }
