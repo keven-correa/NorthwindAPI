@@ -27,6 +27,7 @@ public partial class Employee
     public string? Country { get; set; }
 
     public string? HomePhone { get; set; }
+    public string? ExmpleField { get; set; }
 
     public string? Extension { get; set; }
 

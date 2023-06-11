@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Azure;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NorthwindAPI.Dtos;
 using NorthwindAPI.Dtos.Common;
-using NorthwindAPI.Dtos.Extensions;
-using NorthwindAPI.Dtos.Management;
 using NorthwindAPI.Dtos.Responses;
 using NorthwindAPI.Entities;
 
@@ -13,24 +15,26 @@ namespace NorthwindAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly NorthwindContext _context;
+        private readonly IMapper _mapper;
 
-        public ProductsController(NorthwindContext context)
+        public ProductsController(NorthwindContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct([FromBody] ProductRequestDto productDto)
+        public async Task<ActionResult<CreateProductDto>> PostProduct([FromBody] CreateProductDto productDto)
         {
             if (_context.Products == null)
             {
                 return Problem("Entity set 'NorthwindContext.Products'  is null.");
             }
-            var productEntity = productDto.ToEntity();
-            _context.Products.Add(productEntity);
+            var product = _mapper.Map<Product>(productDto);
+            _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetProduct), new { id = productEntity.ProductId }, productEntity);
+            return CreatedAtAction(nameof(GetProduct), new { id = product.ProductId }, product);
         }
 
         [HttpGet]
@@ -58,9 +62,9 @@ namespace NorthwindAPI.Controllers
                 .AsNoTracking()
                 .ToListAsync();
 
-            var response = new PaginationDto<ProductResponseDto>
+            var response = new
             {
-                Data = products,
+                Results = products,
                 Total = productsCount,
                 CurrentPage = paginationParams.CurrentPage,
                 PageSize = paginationParams.PageSize,
@@ -185,24 +189,38 @@ namespace NorthwindAPI.Controllers
             return Ok(product);
         }
 
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> PutProduct(int id, ProductRequestUpdateDto productDto)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutProduct(int id, CreateProductDto productDto)
         {
             if (!ProductExists(id))
             {
                 return NotFound();
             }
-            var productToUpdate = await _context.Products.FindAsync(id);
-            if (productToUpdate == null) return BadRequest();
 
-            productToUpdate.ProductName = productDto.ProductName!;
-            productToUpdate.QuantityPerUnit = productDto.QuantityPerUnit;
-            productToUpdate.UnitPrice = productDto.UnitPrice;
-            productToUpdate.UnitsInStock = productDto.UnitsInStock;
-            productToUpdate.CategoryId = productDto.CategoryId;
-            productToUpdate.Discontinued = productDto.Discontinued;
+            var product = _mapper.Map<Product>(productDto);
+            product.ProductId = id;
+            _context.Update(product);
+            await _context.SaveChangesAsync();
 
-            _context.Update(productToUpdate);
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<CreateProductDto>> PatchProduct(int id, JsonPatchDocument<CreateProductDto> patchDocument)
+        {
+            if (patchDocument == null)
+                return BadRequest();
+
+            var productExists = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == id);
+
+            var productDto = _mapper.Map<CreateProductDto>(productExists);
+            patchDocument.ApplyTo(productDto, ModelState);
+            var isValid = TryValidateModel(productDto);
+
+            if (!isValid)
+                return BadRequest(ModelState);
+
+            _mapper.Map(productDto, productExists);
             await _context.SaveChangesAsync();
 
             return NoContent();
