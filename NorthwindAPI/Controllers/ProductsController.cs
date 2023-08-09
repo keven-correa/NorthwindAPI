@@ -2,6 +2,7 @@
 using Azure;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using NorthwindAPI.Dtos;
 using NorthwindAPI.Dtos.Common;
@@ -38,41 +39,53 @@ namespace NorthwindAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PaginationDto<ProductResponseDto>>>> GetProducts([FromQuery] PaginationParamsDto paginationParams)
+        [OutputCache(Duration = 35)]
+        public async Task<ActionResult> GetProducts([FromQuery] PaginationDto paginationDto)
         {
-            if (_context.Products == null) return NotFound();
+            #region un comentario ahi
+            //if (_context.Products == null) return NotFound();
 
-            var productsCount = await _context.Products.CountAsync();
+            //var productsCount = await _context.Products.CountAsync();
 
-            var totalPages = (int)Math.Ceiling((double)productsCount / paginationParams.PageSize);
+            //var totalPages = (int)Math.Ceiling((double)productsCount / paginationParams.PageSize);
 
-            var products = await _context.Products.Select(x => new ProductResponseDto
-            {
-                ProductId = x.ProductId,
-                ProductName = x.ProductName,
-                QuantityPerUnit = x.QuantityPerUnit,
-                UnitPrice = x.UnitPrice,
-                UnitsInStock = x.UnitsInStock,
-                CategoryId = x.CategoryId,
-                Discontinued = x.Discontinued,
-                SupplierId = x.SupplierId,
-            })
-                .Skip((paginationParams.CurrentPage - 1) * paginationParams.PageSize)
-                .Take(paginationParams.PageSize)
-                .AsNoTracking()
-                .ToListAsync();
+            //var products = await _context.Products.Select(x => new ProductResponseDto
+            //{
+            //    ProductId = x.ProductId,
+            //    ProductName = x.ProductName,
+            //    QuantityPerUnit = x.QuantityPerUnit,
+            //    UnitPrice = x.UnitPrice,
+            //    UnitsInStock = x.UnitsInStock,
+            //    CategoryId = x.CategoryId,
+            //    Discontinued = x.Discontinued,
+            //    SupplierId = x.SupplierId,
+            //})
+            //    .Skip((paginationParams.CurrentPage - 1) * paginationParams.PageSize)
+            //    .Take(paginationParams.PageSize)
+            //    .AsNoTracking()
+            //    .ToListAsync();
 
-            var response = new
-            {
-                Results = products,
-                Total = productsCount,
-                CurrentPage = paginationParams.CurrentPage,
-                PageSize = paginationParams.PageSize,
-                PageCount = totalPages,
-            };
-            return Ok(response);
+            //var response = new
+            //{
+            //    Results = products,
+            //    Total = productsCount,
+            //    CurrentPage = paginationParams.CurrentPage,
+            //    PageSize = paginationParams.PageSize,
+            //    PageCount = totalPages,
+            //};
+            //return Ok(response);
+            #endregion
+
+            var queryable = _context.Products.Include(x => x.Supplier).AsQueryable();
+            await HttpContext.PaginationParams(queryable, paginationDto.QuantityPerPage);
+            var products = await queryable.Paginate(paginationDto).ToListAsync();
+            return Ok(products);
 
         }
+
+
+        //[FromQuery]
+        //PaginationParamsDto paginationParams
 
         [HttpGet("search-by-name")]
         public async Task<ActionResult<ProductResponseDto>> SearchByName(string name)
@@ -93,42 +106,42 @@ namespace NorthwindAPI.Controllers
             return Ok(product);
         }
         [HttpGet("discontinued")]
-        public async Task<ActionResult<IEnumerable<PaginationDto<ProductResponseDto>>>> GetAllDiscotinuedProducts([FromQuery] PaginationParamsDto paginationParams)
-        {
-            if (_context.Products == null) return NotFound();
+        //public async Task<ActionResult<IEnumerable<PaginationDto<ProductResponseDto>>>> GetAllDiscotinuedProducts([FromQuery] PaginationParamsDto paginationParams)
+        //{
+        //    if (_context.Products == null) return NotFound();
 
-            var productsCount = await _context.Products.Where(p => p.Discontinued == true).CountAsync();
+        //    var productsCount = await _context.Products.Where(p => p.Discontinued == true).CountAsync();
 
-            var totalPages = (int)Math.Ceiling((double)productsCount / paginationParams.PageSize);
+        //    var totalPages = (int)Math.Ceiling((double)productsCount / paginationParams.PageSize);
 
-            var products = await _context.Products
-                .Select(x => new ProductResponseDto
-                {
-                    ProductId = x.ProductId,
-                    ProductName = x.ProductName,
-                    QuantityPerUnit = x.QuantityPerUnit,
-                    UnitPrice = x.UnitPrice,
-                    UnitsInStock = x.UnitsInStock,
-                    CategoryId = x.CategoryId,
-                    Discontinued = x.Discontinued,
-                })
-                .Where(p => p.Discontinued == true)
-                .Skip((paginationParams.CurrentPage - 1) * paginationParams.PageSize)
-                .Take(paginationParams.PageSize)
-                .AsNoTracking()
-                .ToListAsync();
+        //    var products = await _context.Products
+        //        .Select(x => new ProductResponseDto
+        //        {
+        //            ProductId = x.ProductId,
+        //            ProductName = x.ProductName,
+        //            QuantityPerUnit = x.QuantityPerUnit,
+        //            UnitPrice = x.UnitPrice,
+        //            UnitsInStock = x.UnitsInStock,
+        //            CategoryId = x.CategoryId,
+        //            Discontinued = x.Discontinued,
+        //        })
+        //        .Where(p => p.Discontinued == true)
+        //        .Skip((paginationParams.CurrentPage - 1) * paginationParams.PageSize)
+        //        .Take(paginationParams.PageSize)
+        //        .AsNoTracking()
+        //        .ToListAsync();
 
-            var response = new PaginationDto<ProductResponseDto>
-            {
-                Data = products,
-                Total = productsCount,
-                CurrentPage = paginationParams.CurrentPage,
-                PageSize = paginationParams.PageSize,
-                PageCount = totalPages,
-            };
-            return Ok(response);
+        //    var response = new PaginationDto<ProductResponseDto>
+        //    {
+        //        Data = products,
+        //        Total = productsCount,
+        //        CurrentPage = paginationParams.CurrentPage,
+        //        PageSize = paginationParams.PageSize,
+        //        PageCount = totalPages,
+        //    };
+        //    return Ok(response);
 
-        }
+        //}
 
         [HttpGet("api/[controller]/count")]
         public async Task<ActionResult> CountProducts()
@@ -149,6 +162,8 @@ namespace NorthwindAPI.Controllers
         }
 
         [HttpGet("highest-quantity")]
+        [OutputCache(Duration = 25)]
+
         public async Task<ActionResult<ProductResponseDto>> GetProductWithHighestQuantity()
         {
             var product = await _context.Products.Select(p => new ProductResponseDto
@@ -163,7 +178,7 @@ namespace NorthwindAPI.Controllers
             })
                 .OrderByDescending(p => p.UnitsInStock)
                 .FirstOrDefaultAsync();
-
+            await Task.Delay(4000);
             return Ok(product);
         }
 

@@ -1,6 +1,6 @@
 ﻿namespace NorthwindAPI.Dtos.Common
 {
-    public class PaginationDto<T> where T : class
+    public class PaginationDto2<T> where T : class
     {
         public List<T>? Data { get; set; }
         public int Total { get; set; }
